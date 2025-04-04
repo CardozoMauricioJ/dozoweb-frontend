@@ -1,0 +1,32 @@
+.custom-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+  }
+  
+  .custom-table-header {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .custom-header-button {
+    color: orangered;
+  }
+  
+  .custom-pagination-button {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+  
+  .custom-opinion-button {
+    background-color: orangered;
+    border-color: orangered;
+    color: white;
+  }
+  
+  .custom-table {
+    font-family: cursive;
+  }
+
+  h2 {
+    font-family: cursive;
+  }

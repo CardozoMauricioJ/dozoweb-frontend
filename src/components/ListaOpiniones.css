@@ -1,0 +1,46 @@
+.opiniones-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .opiniones-title {
+    color: #007bff;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .opiniones-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .opiniones-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+  }
+  
+  .opinion-usuario {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .opinion-puntaje {
+    margin-right: 10px;
+  }
+  
+  .opinion-comentario {
+    margin-right: 10px;
+  }
+  
+  .opinion-fecha {
+    color: #888;
+  }
+  
+  .no-opiniones {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+  }
