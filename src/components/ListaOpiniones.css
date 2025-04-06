@@ -1,46 +1,68 @@
 .opiniones-container {
-    background-color: #f8f9fa;
-    padding: 20px;
-    margin-top: 20px;
-  }
-  
-  .opiniones-title {
-    color: #007bff;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .opiniones-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .opiniones-item {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: white;
-  }
-  
-  .opinion-usuario {
-    font-weight: bold;
-    margin-right: 10px;
-  }
-  
-  .opinion-puntaje {
-    margin-right: 10px;
-  }
-  
-  .opinion-comentario {
-    margin-right: 10px;
-  }
-  
-  .opinion-fecha {
-    color: #888;
-  }
-  
-  .no-opiniones {
-    text-align: center;
-    font-style: italic;
-    color: #888;
-  }
+  background-color: #f8f9fa;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.opiniones-title {
+  color: #007bff;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.agregar-opinion-form {
+  background-color: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.agregar-opinion-form h4 {
+  color: orangered;
+  margin-bottom: 15px;
+}
+
+.opiniones-list {
+  list-style: none;
+  padding: 0;
+}
+
+.opiniones-item {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: white;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.opinion-usuario {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #343a40;
+}
+
+.opinion-puntaje {
+  color: #ffc107; /* Amarillo para las estrellas (simulado) */
+  margin-bottom: 5px;
+}
+
+.opinion-comentario {
+  margin-bottom: 10px;
+  color: #495057;
+}
+
+.opinion-fecha {
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+.no-opiniones {
+  text-align: center;
+  font-style: italic;
+  color: #6c757d;
+}

@@ -40,8 +40,8 @@ const ListaCervecerias = () => {
     setOrderDirection(orderDirection === 'asc' ? 'desc' : 'asc');
   };
 
-  const verOpiniones = (cerveceriaId) => {
-    setCerveceriaSeleccionada(cerveceriaId);
+  const verOpiniones = (CerveceriaId) => {
+    setCerveceriaSeleccionada(CerveceriaId);
   };
 
   return (
@@ -87,7 +87,7 @@ const ListaCervecerias = () => {
           Siguiente
         </button>
       </div>
-      {cerveceriaSeleccionada && <ListaOpiniones cerveceriaId={cerveceriaSeleccionada} />}
+      {cerveceriaSeleccionada && <ListaOpiniones CerveceriaId={cerveceriaSeleccionada} />}
     </div>
   );
 };

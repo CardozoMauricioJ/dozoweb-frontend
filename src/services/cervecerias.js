@@ -65,8 +65,13 @@ const CerveceriasService = {
   },
 
   // Obtener opiniones por ID de cervecería
-  obtenerOpinionesPorCerveceriaId: (cerveceriaId) => {
-    return axios.get(`${API_URL}/${cerveceriaId}/opiniones`);
+  obtenerOpinionesPorCerveceriaId: (CerveceriaId) => {
+    return axios.get(`${API_URL}/${CerveceriaId}/Opiniones`);
+  },
+
+  // Crear opinion
+  crearOpinion: (CerveceriaId, opinion) => {
+    return axios.post(`${API_URL}/${CerveceriaId}/Opiniones`, opinion);
   },
 };
 
