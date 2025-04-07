@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const API_URL = 'https://localhost:7060/api/Cervecerias';
+const API_URL_CERVECERIAS = 'https://localhost:7060/api/Cervecerias';
 
 const CerveceriasService = {
   // Obtener todas las cervecerías (con paginación y ordenamiento)
   obtenerCervecerias: (pagina = 1, orderBy = 'Nombre', orderDirection = 'asc') => {
-    return axios.get(API_URL, {
+    return axios.get(API_URL_CERVECERIAS, {
       params: {
         page: pagina,
         orderBy: orderBy,
@@ -16,12 +16,12 @@ const CerveceriasService = {
 
   // Obtener una cervecería por ID
   obtenerCerveceriaPorId: (id) => {
-    return axios.get(`${API_URL}/${id}`);
+    return axios.get(`${API_URL_CERVECERIAS}/${id}`);
   },
 
   // Filtrar cervecerías por precio
   filtrarCerveceriasPorPrecio: (precioMinimo, precioMaximo) => {
-    return axios.get(`${API_URL}/FiltrarPorPrecio`, {
+    return axios.get(`${API_URL_CERVECERIAS}/FiltrarPorPrecio`, {
       params: {
         precioMinimo,
         precioMaximo,
@@ -31,7 +31,7 @@ const CerveceriasService = {
 
   // Buscar cervecerías por nombre o dirección
   buscarCervecerias: (terminoBusqueda) => {
-    return axios.get(`${API_URL}/Buscar`, {
+    return axios.get(`${API_URL_CERVECERIAS}/Buscar`, {
       params: {
         terminoBusqueda,
       },
@@ -40,7 +40,7 @@ const CerveceriasService = {
 
   // Buscar cervecerías por ubicación
   buscarCerveceriasPorUbicacion: (latitud, longitud, radio) => {
-    return axios.get(`${API_URL}/BuscarPorUbicacion`, {
+    return axios.get(`${API_URL_CERVECERIAS}/BuscarPorUbicacion`, {
       params: {
         latitud,
         longitud,
@@ -51,27 +51,27 @@ const CerveceriasService = {
 
   // Crear una nueva cervecería
   crearCerveceria: (cerveceria) => {
-    return axios.post(API_URL, cerveceria);
+    return axios.post(API_URL_CERVECERIAS, cerveceria);
   },
 
   // Actualizar una cervecería existente
   actualizarCerveceria: (id, cerveceria) => {
-    return axios.put(`${API_URL}/${id}`, cerveceria);
+    return axios.put(`${API_URL_CERVECERIAS}/${id}`, cerveceria);
   },
 
   // Eliminar una cervecería por ID
   eliminarCerveceria: (id) => {
-    return axios.delete(`${API_URL}/${id}`);
+    return axios.delete(`${API_URL_CERVECERIAS}/${id}`);
   },
 
-  // Obtener opiniones por ID de cervecería
-  obtenerOpinionesPorCerveceriaId: (CerveceriaId) => {
-    return axios.get(`${API_URL}/${CerveceriaId}/Opiniones`);
-  },
-
-  // Crear opinion
-  crearOpinion: (CerveceriaId, opinion) => {
-    return axios.post(`${API_URL}/${CerveceriaId}/Opiniones`, opinion);
+  // Obtener opiniones por ID de cervecería (con paginación)
+  obtenerOpinionesPorCerveceriaId: (CerveceriaId, pageNumber = 1, pageSize = 5) => {
+    return axios.get(`${API_URL_CERVECERIAS}/${CerveceriaId}/Opiniones`, {
+      params: {
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      },
+    });
   },
 };
 

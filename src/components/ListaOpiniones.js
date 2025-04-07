@@ -11,31 +11,62 @@ const ListaOpiniones = ({ CerveceriaId }) => {
   const [nuevoComentario, setNuevoComentario] = useState('');
   const [enviandoOpinion, setEnviandoOpinion] = useState(false);
   const [mensajeEnvio, setMensajeEnvio] = useState('');
+  const [erroresFormulario, setErroresFormulario] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const opinionsPerPage = 5; // Coincide con el pageSize del backend
 
   useEffect(() => {
     if (CerveceriaId) {
-      CerveceriasService.obtenerOpinionesPorCerveceriaId(CerveceriaId)
-        .then((response) => {
-          setOpiniones(response.data);
-        })
-        .catch((error) => {
-          console.error(error);
-          setOpiniones([]);
-        });
+      setCurrentPage(1); // Resetear la página a 1 al cambiar de CerveceriaId
+      fetchOpiniones(CerveceriaId, 1, opinionsPerPage); // Cargar la primera página al inicio
     } else {
       setOpiniones([]);
+      setTotalPages(1);
+      setCurrentPage(1);
     }
-  }, [CerveceriaId]);
+  }, [CerveceriaId, opinionsPerPage]); // Eliminamos currentPage de las dependencias
+
+  const fetchOpiniones = async (cerveceriaId, page, pageSize) => {
+    try {
+      const response = await CerveceriasService.obtenerOpinionesPorCerveceriaId(cerveceriaId, page, pageSize);
+      setOpiniones(response.data);
+      setTotalPages(parseInt(response.headers['x-total-pages']) || 1);
+      setCurrentPage(page); // Actualizar currentPage después de la carga exitosa
+    } catch (error) {
+      console.error('Error al obtener opiniones:', error);
+      setOpiniones([]);
+      setTotalPages(1);
+      setCurrentPage(1);
+    }
+  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     if (name === 'usuario') setNuevoUsuario(value);
     if (name === 'puntaje') setNuevoPuntaje(parseInt(value));
     if (name === 'comentario') setNuevoComentario(value);
+    setErroresFormulario({ ...erroresFormulario, [name]: '' });
+  };
+
+  const validarFormulario = () => {
+    let errores = {};
+    if (!nuevoUsuario.trim()) {
+      errores.usuario = 'El nombre es requerido.';
+    }
+    if (nuevoPuntaje < 1 || nuevoPuntaje > 5) {
+      errores.puntaje = 'El puntaje debe estar entre 1 y 5.';
+    }
+    setErroresFormulario(errores);
+    return Object.keys(errores).length === 0;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!validarFormulario()) {
+      return;
+    }
+
     if (!CerveceriaId) {
       setMensajeEnvio('Error: No se ha especificado la cervecería.');
       return;
@@ -53,18 +84,13 @@ const ListaOpiniones = ({ CerveceriaId }) => {
 
     try {
       await OpinionesService.crearOpinion(nuevaOpinion);
-      CerveceriasService.obtenerOpinionesPorCerveceriaId(CerveceriaId)
-        .then((response) => {
-          setOpiniones(response.data);
-          setNuevoUsuario('');
-          setNuevoPuntaje(5);
-          setNuevoComentario('');
-          setMensajeEnvio('¡Opinión enviada!');
-        })
-        .catch((error) => {
-          console.error('Error al recargar opiniones:', error);
-          setMensajeEnvio('Error al mostrar la nueva opinión.');
-        });
+      fetchOpiniones(CerveceriaId, 1, opinionsPerPage);
+      setNuevoUsuario('');
+      setNuevoPuntaje(5);
+      setNuevoComentario('');
+      setMensajeEnvio('¡Opinión enviada!');
+      setErroresFormulario({});
+      setCurrentPage(1);
     } catch (error) {
       console.error('Error al enviar opinión:', error);
       setMensajeEnvio('Error al enviar la opinión.');
@@ -77,7 +103,43 @@ const ListaOpiniones = ({ CerveceriaId }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('es-AR', options); // Formato específico para Argentina
+    return date.toLocaleDateString('es-AR', options);
+  };
+
+  const renderStars = (puntaje) => {
+    const fullStars = '★'.repeat(puntaje);
+    const emptyStars = '☆'.repeat(5 - puntaje);
+    return <span className="opinion-stars">{fullStars}{emptyStars}</span>;
+  };
+
+  const handlePageChange = (newPage) => {
+    //setCurrentPage(newPage);
+    fetchOpiniones(CerveceriaId, newPage, opinionsPerPage);
+  };
+
+  const renderPaginationControls = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <nav className="mt-3">
+        <ul className="pagination justify-content-center">
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Anterior</button>
+          </li>
+          {pageNumbers.map(number => (
+            <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+              <button className="page-link" onClick={() => handlePageChange(number)}>{number}</button>
+            </li>
+          ))}
+          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Siguiente</button>
+          </li>
+        </ul>
+      </nav>
+    );
   };
 
   return (
@@ -98,6 +160,7 @@ const ListaOpiniones = ({ CerveceriaId }) => {
               onChange={handleInputChange}
               required
             />
+            {erroresFormulario.usuario && <div className="text-danger">{erroresFormulario.usuario}</div>}
           </div>
           <div className="mb-3">
             <label htmlFor="puntaje" className="form-label">Puntaje (1-5):</label>
@@ -114,6 +177,7 @@ const ListaOpiniones = ({ CerveceriaId }) => {
               <option value={4}>4</option>
               <option value={5} selected>5</option>
             </select>
+            {erroresFormulario.puntaje && <div className="text-danger">{erroresFormulario.puntaje}</div>}
           </div>
           <div className="mb-3">
             <label htmlFor="comentario" className="form-label">Comentario (opcional):</label>
@@ -141,13 +205,18 @@ const ListaOpiniones = ({ CerveceriaId }) => {
           {opiniones.map((opinion) => (
             <li key={opinion.id} className="opiniones-item">
               <span className="opinion-usuario">{opinion.usuario}</span>
-              <span className="opinion-puntaje">Puntaje: {opinion.puntaje}</span>
+              <div className="opinion-rating">
+                <span className="opinion-label">Puntaje:</span>
+                {renderStars(opinion.puntaje)}
+              </div>
               <span className="opinion-comentario">{opinion.comentario}</span>
-              <span className="opinion-fecha">{formatDate(opinion.fecha)}</span> {/* Usar la función de formateo */}
+              <span className="opinion-fecha">{formatDate(opinion.fecha)}</span>
             </li>
           ))}
         </ul>
       )}
+
+      {totalPages > 1 && renderPaginationControls()}
     </div>
   );
 };

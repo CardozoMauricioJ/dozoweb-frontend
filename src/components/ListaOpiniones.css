@@ -47,8 +47,25 @@
 }
 
 .opinion-puntaje {
-  color: #ffc107; /* Amarillo para las estrellas (simulado) */
+  color: #ffc107;
   margin-bottom: 5px;
+}
+
+.opinion-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.opinion-label {
+  margin-right: 5px;
+  font-size: 0.9em;
+  color: #6c757d;
+}
+
+.opinion-stars {
+  color: Orangered; /* Cambia el color de las estrellas si lo deseas */
+  font-size: 1.2em; /* Cambia el tamaño de las estrellas si lo deseas */
 }
 
 .opinion-comentario {
