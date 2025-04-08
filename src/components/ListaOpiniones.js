@@ -14,25 +14,25 @@ const ListaOpiniones = ({ CerveceriaId }) => {
   const [erroresFormulario, setErroresFormulario] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const opinionsPerPage = 5; // Coincide con el pageSize del backend
+  const opinionsPerPage = 5; 
 
   useEffect(() => {
     if (CerveceriaId) {
-      setCurrentPage(1); // Resetear la página a 1 al cambiar de CerveceriaId
-      fetchOpiniones(CerveceriaId, 1, opinionsPerPage); // Cargar la primera página al inicio
+      setCurrentPage(1); 
+      fetchOpiniones(CerveceriaId, 1, opinionsPerPage); 
     } else {
       setOpiniones([]);
       setTotalPages(1);
       setCurrentPage(1);
     }
-  }, [CerveceriaId, opinionsPerPage]); // Eliminamos currentPage de las dependencias
+  }, [CerveceriaId, opinionsPerPage]); 
 
   const fetchOpiniones = async (cerveceriaId, page, pageSize) => {
     try {
       const response = await CerveceriasService.obtenerOpinionesPorCerveceriaId(cerveceriaId, page, pageSize);
       setOpiniones(response.data);
       setTotalPages(parseInt(response.headers['x-total-pages']) || 1);
-      setCurrentPage(page); // Actualizar currentPage después de la carga exitosa
+      setCurrentPage(page); 
     } catch (error) {
       console.error('Error al obtener opiniones:', error);
       setOpiniones([]);
