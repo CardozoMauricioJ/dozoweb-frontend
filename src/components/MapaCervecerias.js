@@ -6,6 +6,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/images/marker-icon.png';
 import 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet-draw';
+import beerIconUrl from '../assets/icons/beer-icon.png';
 
 function MapaCervecerias() {
   const [userLocation, setUserLocation] = useState(null);
@@ -33,8 +34,8 @@ function MapaCervecerias() {
   const MapWithUserLocation = () => {
     const map = useMap();
     useEffect(() => {
-      if (userLocation) {
-        map.setView(userLocation, 15); // Centrar en la ubicación del usuario con zoom 15
+      if (userLocation && map) {
+        map.setView(userLocation, 15);
         L.marker(userLocation).addTo(map).bindPopup("Tu ubicación").openPopup();
       }
     }, [map]);
@@ -46,58 +47,58 @@ function MapaCervecerias() {
     const drawnItems = useRef(new L.FeatureGroup());
 
     useEffect(() => {
-      if (map) {
-        map.addLayer(drawnItems.current);
+      if (!map) return;
 
-        const drawControl = new L.Control.Draw({
-          draw: {
-            polygon: false,
-            polyline: false,
-            circle: false,
-            circlemarker: false,
-            marker: false,
-            rectangle: true,
-          },
-          edit: {
-            featureGroup: drawnItems.current,
-          },
-        });
-        map.addControl(drawControl);
-        drawControlRef.current = drawControl;
+      map.addLayer(drawnItems.current);
 
-        map.on(L.Draw.Event.CREATED, (event) => {
-          const layer = event.layer;
-          drawnItems.current.addLayer(layer);
+      const drawControl = new L.Control.Draw({
+        draw: {
+          polygon: false,
+          polyline: false,
+          circle: false,
+          circlemarker: false,
+          marker: false,
+          rectangle: true,
+        },
+        edit: {
+          featureGroup: drawnItems.current,
+        },
+      });
+
+      map.addControl(drawControl);
+      drawControlRef.current = drawControl;
+
+      const handleCreated = (event) => {
+        const layer = event.layer;
+        drawnItems.current.addLayer(layer);
+        const bounds = layer.getBounds();
+        const northEast = bounds.getNorthEast();
+        const southWest = bounds.getSouthWest();
+        console.log("Límites del rectángulo:", northEast, southWest);
+        buscarCerveceriasEnArea(northEast, southWest);
+      };
+
+      const handleEdited = (event) => {
+        event.layers.eachLayer((layer) => {
           const bounds = layer.getBounds();
           const northEast = bounds.getNorthEast();
           const southWest = bounds.getSouthWest();
-          console.log("Límites del rectángulo:", northEast, southWest);
+          console.log("Límites editados:", northEast, southWest);
           buscarCerveceriasEnArea(northEast, southWest);
         });
+      };
 
-        map.on(L.Draw.Event.EDITED, (event) => {
-          const layers = event.layers;
-          layers.eachLayer((layer) => {
-            const bounds = layer.getBounds();
-            const northEast = bounds.getNorthEast();
-            const southWest = bounds.getSouthWest();
-            console.log("Límites editados:", northEast, southWest);
-            buscarCerveceriasEnArea(northEast, southWest);
-          });
-        });
-
-        map.on(L.Draw.Event.DELETED, (event) => {
-          console.log("Figura eliminada");
-        });
-      }
+      map.on(L.Draw.Event.CREATED, handleCreated);
+      map.on(L.Draw.Event.EDITED, handleEdited);
+      map.on(L.Draw.Event.DELETED, () => {
+        console.log("Figura eliminada");
+      });
 
       return () => {
-        if (map && drawControlRef.current) {
-          map.removeControl(drawControlRef.current);
-          map.off(L.Draw.Event.CREATED);
-          map.off(L.Draw.Event.EDITED);
-          map.off(L.Draw.Event.DELETED);
-        }
+        map.removeControl(drawControl);
+        map.off(L.Draw.Event.CREATED, handleCreated);
+        map.off(L.Draw.Event.EDITED, handleEdited);
+        map.off(L.Draw.Event.DELETED);
       };
     }, [map]);
 
@@ -107,7 +108,8 @@ function MapaCervecerias() {
   const buscarCerveceriasEnArea = async (northEast, southWest) => {
     try {
       const response = await fetch(
-        `/api/Cervecerias/BuscarCerveceriasEnRectangulo?northEastLat=${northEast.lat}&northEastLng=${northEast.lng}&southWestLat=${southWest.lat}&southWestLng=${southWest.lng}`
+        `https://localhost:7060/api/Cervecerias/BuscarCerveceriasEnRectangulo?northEastLat=${northEast.lat}&northEastLng=${northEast.lng}&southWestLat=${southWest.lat}&southWestLng=${southWest.lng}`,
+        { headers: { Accept: 'application/json' } }
       );
 
       if (!response.ok) {
@@ -117,15 +119,21 @@ function MapaCervecerias() {
 
       const data = await response.json();
       console.log("Cervecerías encontradas:", data);
-      mostrarCerveceriasEnMapa(data);
+      setCerveceriasEncontradas(data);
     } catch (error) {
       console.error('Error al comunicarse con el backend:', error);
     }
   };
 
-  const mostrarCerveceriasEnMapa = (cervecerias) => {
-    setCerveceriasEncontradas(cervecerias);
-  };
+  const beerIcon = L.icon({
+    iconUrl: beerIconUrl,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'leaflet/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+    shadowAnchor: [12, 41],
+  });
 
   return (
     <MapContainer
@@ -138,18 +146,46 @@ function MapaCervecerias() {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {userLocation && <MapWithUserLocation />} {/* Renderiza el componente para centrar */}
+      {userLocation && <MapWithUserLocation />}
       {userLocation && <MapWithDrawing />}
-      {cerveceriasEncontradas.map((cerveceria) => (
-        <Marker
-          key={cerveceria.id}
-          position={[cerveceria.latitud, cerveceria.longitud]}
-        >
-          <Popup>
-            {cerveceria.nombre} <br /> {cerveceria.direccion}
-          </Popup>
-        </Marker>
-      ))}
+      {cerveceriasEncontradas.map((cerveceria) => {
+        /*const puntaje = cerveceria.opiniones.map(opinion => opinion.puntaje);
+        const promedioPuntaje = puntaje.length > 0
+          ? puntaje.reduce((sum, rating) => sum + rating, 0) / puntaje.length
+          : 0;
+
+        const renderEstrellas = (promedio) => {
+          const fullStars = Math.floor(promedio);
+          const hasHalfStar = promedio % 1 !== 0;
+          const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+          let stars = '';
+          for (let i = 0; i < fullStars; i++) {
+            stars += '★';
+          }
+          if (hasHalfStar) {
+            stars += '½';
+          }
+          for (let i = 0; i < emptyStars; i++) {
+            stars += '☆';
+          }
+          return stars;
+        };*/
+
+        return (
+          <Marker
+            key={cerveceria.id}
+            position={[cerveceria.latitud, cerveceria.longitud]}
+            icon={beerIcon}
+          >
+            <Popup>
+              <b>{cerveceria.nombre}</b> <br />
+              Dirección: {cerveceria.direccion} <br />
+              Precio Promedio: ${cerveceria.precioPromedio}
+            </Popup>
+          </Marker>
+          //Valoración: {renderEstrellas(promedioPuntaje)} ({promedioPuntaje.toFixed(1)})  "Popup"
+        );
+      })}
     </MapContainer>
   );
 }
