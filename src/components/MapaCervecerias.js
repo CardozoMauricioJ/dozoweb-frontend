@@ -149,7 +149,7 @@ function MapaCervecerias() {
       {userLocation && <MapWithUserLocation />}
       {userLocation && <MapWithDrawing />}
       {cerveceriasEncontradas.map((cerveceria) => {
-        /*const puntaje = cerveceria.opiniones.map(opinion => opinion.puntaje);
+        const puntaje = cerveceria.opiniones.map(opinion => opinion.puntaje);
         const promedioPuntaje = puntaje.length > 0
           ? puntaje.reduce((sum, rating) => sum + rating, 0) / puntaje.length
           : 0;
@@ -169,7 +169,7 @@ function MapaCervecerias() {
             stars += '☆';
           }
           return stars;
-        };*/
+        };
 
         return (
           <Marker
@@ -180,7 +180,8 @@ function MapaCervecerias() {
             <Popup>
               <b>{cerveceria.nombre}</b> <br />
               Dirección: {cerveceria.direccion} <br />
-              Precio Promedio: ${cerveceria.precioPromedio}
+              Precio Promedio: ${cerveceria.precioPromedio} <br />
+              Valoración: {renderEstrellas(promedioPuntaje)} ({promedioPuntaje.toFixed(1)})
             </Popup>
           </Marker>
           //Valoración: {renderEstrellas(promedioPuntaje)} ({promedioPuntaje.toFixed(1)})  "Popup"
